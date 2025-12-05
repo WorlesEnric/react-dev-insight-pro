@@ -9,6 +9,8 @@ import { Router, Request, Response } from 'express';
 import { getLLMService, LLMService } from '../services/llmService';
 import { APIResponse, OptimizationCategory } from '../types';
 import { loadConfig } from '../config';
+import type { ClientOptions } from 'openai';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 const router = Router();
 
@@ -65,7 +67,7 @@ router.post('/analyze', async (req: Request, res: Response) => {
       success: true,
       data: result
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {
@@ -120,7 +122,7 @@ router.post('/validate', async (req: Request, res: Response) => {
       success: true,
       data: result
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {
@@ -178,7 +180,7 @@ router.post('/commit-message', async (req: Request, res: Response) => {
       success: true,
       data: { message }
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {
@@ -224,8 +226,8 @@ router.post('/explain', async (req: Request, res: Response) => {
 
     const service = await getLLMServiceInstance();
     const validCategories: OptimizationCategory[] = ['performance', 'accessibility', 'maintainability', 'bundle-size', 'ux', 'code-quality'];
-    const category: OptimizationCategory = (goal && validCategories.includes(goal as OptimizationCategory)) 
-      ? (goal as OptimizationCategory) 
+    const category: OptimizationCategory = (goal && validCategories.includes(goal as OptimizationCategory))
+      ? (goal as OptimizationCategory)
       : 'code-quality';
     const explanation = await service.explainChange({
       originalCode,
@@ -237,7 +239,7 @@ router.post('/explain', async (req: Request, res: Response) => {
       success: true,
       data: { explanation }
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {
@@ -294,7 +296,7 @@ router.post('/suggest-related', async (req: Request, res: Response) => {
       success: true,
       data: { suggestions }
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {
@@ -331,10 +333,10 @@ router.get('/status', async (_req: Request, res: Response) => {
         provider: config.llm.provider,
         model: process.env.LLM_MODEL_NAME || config.llm.model,
         hasApiKey,
-        baseURL: process.env.LLM_BASE_URL
+        ...(process.env.LLM_BASE_URL ? { baseURL: process.env.LLM_BASE_URL } : {})
       }
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {
@@ -382,7 +384,7 @@ router.post('/custom-prompt', async (req: Request, res: Response) => {
 
     const config = await loadConfig();
     const OpenAI = (await import('openai')).default;
-    const clientConfig: OpenAI.ClientOptions = {
+    const clientConfig: ClientOptions = {
       apiKey,
     };
     if (process.env.LLM_BASE_URL) {
@@ -390,7 +392,7 @@ router.post('/custom-prompt', async (req: Request, res: Response) => {
     }
     const client = new OpenAI(clientConfig);
 
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+    const messages: ChatCompletionMessageParam[] = [];
     if (systemPrompt) {
       messages.push({
         role: 'system',
@@ -410,7 +412,7 @@ router.post('/custom-prompt', async (req: Request, res: Response) => {
 
     const responseText = completion.choices[0]?.message?.content || '';
 
-    const response: APIResponse<{ 
+    const response: APIResponse<{
       response: string;
       usage: {
         inputTokens: number;
@@ -426,7 +428,7 @@ router.post('/custom-prompt', async (req: Request, res: Response) => {
         }
       }
     };
-    
+
     res.json(response);
   } catch (error) {
     const response: APIResponse<null> = {

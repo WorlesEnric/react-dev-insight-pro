@@ -39,7 +39,7 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-  
+
   const config: RequestInit = {
     ...options,
     headers: {
@@ -47,11 +47,11 @@ async function request<T>(
       ...options.headers
     }
   };
-  
+
   try {
     const response = await fetch(url, config);
     const data: APIResponse<T> = await response.json();
-    
+
     if (!response.ok || !data.success) {
       throw new APIError(
         data.error || 'Request failed',
@@ -59,13 +59,13 @@ async function request<T>(
         data.error
       );
     }
-    
+
     return data.data as T;
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
     }
-    
+
     throw new APIError(
       error instanceof Error ? error.message : 'Network error',
       0
@@ -90,7 +90,10 @@ export interface AnalyzeElementParams {
 export async function analyzeElement(params: AnalyzeElementParams): Promise<AnalysisResult> {
   return request<AnalysisResult>('/analysis/element', {
     method: 'POST',
-    body: JSON.stringify(params)
+    body: JSON.stringify({
+      ...params,
+      optimizationGoal: params.goal
+    })
   });
 }
 
@@ -101,7 +104,7 @@ export async function analyzeFile(
 ): Promise<AnalysisResult> {
   return request<AnalysisResult>('/analysis/file', {
     method: 'POST',
-    body: JSON.stringify({ projectPath, filePath, goal })
+    body: JSON.stringify({ projectPath, filePath, optimizationGoal: goal })
   });
 }
 
@@ -111,8 +114,8 @@ export async function analyzeComponentByName(
   goal?: string
 ): Promise<AnalysisResult> {
   const params = new URLSearchParams({ projectPath });
-  if (goal) params.set('goal', goal);
-  
+  if (goal) params.set('optimizationGoal', goal);
+
   return request<AnalysisResult>(
     `/analysis/component/${encodeURIComponent(componentName)}?${params}`
   );
@@ -204,7 +207,7 @@ export async function getModificationHistory(
 ): Promise<ModificationEntry[]> {
   const params = new URLSearchParams({ projectPath });
   if (filePath) params.set('filePath', filePath);
-  
+
   return request<ModificationEntry[]>(`/modification/history?${params}`);
 }
 
@@ -294,7 +297,7 @@ export async function getGitHistory(
 }>> {
   const params = new URLSearchParams({ projectPath, limit: String(limit) });
   if (filePath) params.set('filePath', filePath);
-  
+
   return request(`/git/history?${params}`);
 }
 

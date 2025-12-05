@@ -54,7 +54,7 @@ export class CodeAnalyzerService {
       parseResult.componentName;
 
     if (componentName) {
-      const extracted = extractComponentCode(sourceCode, componentName);
+      const extracted = extractComponentCode(sourceCode, componentName, filePath);
       if (extracted) {
         componentCode = extracted;
       }
@@ -244,7 +244,11 @@ export class CodeAnalyzerService {
 
     let code = readResult.content;
     if (componentName) {
-      const extracted = extractComponentCode(readResult.content, componentName);
+      const extracted = extractComponentCode(
+        readResult.content,
+        componentName,
+        filePath
+      );
       if (extracted) {
         code = extracted;
       }

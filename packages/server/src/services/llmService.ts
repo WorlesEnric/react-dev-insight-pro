@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import type { ClientOptions } from 'openai';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import { getConfig } from '../config/index.js';
 import { SYSTEM_PROMPT, buildAnalysisPrompt, buildCommitMessagePrompt } from '../utils/prompts.js';
 import type {
@@ -23,7 +25,7 @@ export class LLMService {
   private openai: OpenAI | null = null;
   private initialized = false;
   private baseURL: string | undefined;
-  private model: string;
+  private model: string = 'gpt-3.5-turbo';
 
   constructor() {
     this.initialize();
@@ -39,7 +41,7 @@ export class LLMService {
     this.model = process.env.LLM_MODEL_NAME || config.llm.model;
 
     if (apiKey) {
-      const clientConfig: OpenAI.ClientOptions = {
+      const clientConfig: ClientOptions = {
         apiKey,
       };
       if (this.baseURL) {
@@ -70,7 +72,7 @@ export class LLMService {
     }
 
     const config = getConfig();
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+    const messages: ChatCompletionMessageParam[] = [];
 
     if (request.systemPrompt) {
       messages.push({

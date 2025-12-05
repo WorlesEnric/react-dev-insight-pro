@@ -246,7 +246,7 @@ export function preservesPublicAPI(
   }
 
   // Check prop types (basic check)
-  const propTypeRegex = /interface\s+\w*Props\s*{([^}]+)}/g;
+
 
   const originalProps = extractPropsFromInterface(originalCode);
   const modifiedProps = extractPropsFromInterface(modifiedCode);

@@ -44,15 +44,15 @@ export function parseCode(code: string, filename?: string): t.File {
   return parser.parse(code, {
     sourceType: 'module',
     plugins: [
-      isJSX ? 'jsx' : null,
-      isTypeScript ? 'typescript' : null,
+      ...(isJSX ? ['jsx' as const] : []),
+      ...(isTypeScript ? ['typescript' as const] : []),
       'classProperties',
       'decorators-legacy',
       'exportDefaultFrom',
       'dynamicImport',
       'optionalChaining',
       'nullishCoalescingOperator',
-    ].filter((p): p is NonNullable<typeof p> => p !== null),
+    ],
   });
 }
 
@@ -173,7 +173,6 @@ export function analyzeReactComponent(
           const hookInfo: HookInfo = {
             name: hookName,
             value: null,
-            dependencies: undefined,
           };
 
           // Extract useState initial value and setter name
@@ -323,8 +322,8 @@ function isLikelyReactComponent(name: string): boolean {
 /**
  * Find component boundaries in code
  */
-export function findComponentBoundaries(code: string): ComponentBoundary[] {
-  const ast = parseCode(code);
+export function findComponentBoundaries(code: string, filename?: string): ComponentBoundary[] {
+  const ast = parseCode(code, filename);
   const boundaries: ComponentBoundary[] = [];
 
   traverse(ast, {
@@ -374,9 +373,10 @@ export function findComponentBoundaries(code: string): ComponentBoundary[] {
  */
 export function extractComponentCode(
   fullCode: string,
-  componentName: string
+  componentName: string,
+  filename?: string
 ): string | null {
-  const boundaries = findComponentBoundaries(fullCode);
+  const boundaries = findComponentBoundaries(fullCode, filename);
   const component = boundaries.find((b) => b.name === componentName);
 
   if (!component) {
@@ -393,9 +393,10 @@ export function extractComponentCode(
 export function getNodeLineRange(
   code: string,
   nodeType: string,
-  nodeName: string
+  nodeName: string,
+  filename?: string
 ): { start: number; end: number } | null {
-  const ast = parseCode(code);
+  const ast = parseCode(code, filename);
   let result: { start: number; end: number } | null = null;
 
   traverse(ast, {

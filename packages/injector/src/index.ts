@@ -31,19 +31,6 @@ interface ReactDevInsightState {
   tooltip: HTMLDivElement | null;
 }
 
-// React Fiber tag constants
-const FIBER_TAGS = {
-  FunctionComponent: 0,
-  ClassComponent: 1,
-  HostRoot: 3,
-  HostComponent: 5,
-  HostText: 6,
-  ForwardRef: 11,
-  MemoComponent: 14,
-  SimpleMemoComponent: 15,
-  LazyComponent: 16
-};
-
 // State
 const state: ReactDevInsightState = {
   isInspecting: false,
@@ -53,132 +40,73 @@ const state: ReactDevInsightState = {
 };
 
 /**
- * Find the React Fiber node for a DOM element
+ * Robustly find the source location using React's internal Debug Source
+ * which is present in almost all Dev builds.
  */
-function findFiberNode(element: HTMLElement): FiberNode | null {
-  // React 18+ uses __reactFiber$ prefix
-  const fiberKey = Object.keys(element).find(
-    key => key.startsWith('__reactFiber$') || key.startsWith('__reactInternalInstance$')
-  );
-  
-  if (fiberKey) {
-    return (element as unknown as Record<string, FiberNode>)[fiberKey] ?? null;
-  }
-  
-  return null;
-}
+function getSourceFromElement(element: HTMLElement) {
+  let current: HTMLElement | null = element;
 
-/**
- * Find the nearest React component (function or class) from a fiber node
- */
-function findNearestComponent(fiber: FiberNode | null): FiberNode | null {
-  let current = fiber;
-  
+  // Traverse up the DOM tree
   while (current) {
-    const { tag } = current;
-    
-    // Check if this is a function or class component
-    if (
-      tag === FIBER_TAGS.FunctionComponent ||
-      tag === FIBER_TAGS.ClassComponent ||
-      tag === FIBER_TAGS.ForwardRef ||
-      tag === FIBER_TAGS.MemoComponent ||
-      tag === FIBER_TAGS.SimpleMemoComponent
-    ) {
-      // Skip anonymous or internal components
-      const name = getComponentName(current);
-      if (name && !name.startsWith('_') && name !== 'Anonymous') {
-        return current;
+    // Method 1: Check for React Fiber instance (Standard React Dev Mode)
+    const fiberKey = Object.keys(current).find(key =>
+      key.startsWith('__reactFiber$')
+    );
+
+    if (fiberKey) {
+      // @ts-ignore
+      const fiber = current[fiberKey] as FiberNode;
+
+      // Traverse up the Fiber tree from this DOM node
+      let fiberNode: FiberNode | null = fiber;
+      while (fiberNode) {
+        // _debugSource contains { fileName, lineNumber }
+        if (fiberNode._debugSource) {
+          return {
+            fileName: fiberNode._debugSource.fileName,
+            lineNumber: fiberNode._debugSource.lineNumber,
+            // Try to get the component name from the function/class type
+            componentName: getComponentName(fiberNode)
+          };
+        }
+        fiberNode = fiberNode.return;
       }
     }
-    
-    current = current.return;
+
+    // Method 2: Check for explicit data attributes (if Method 1 fails)
+    // This requires the babel plugin mentioned in Step 1
+    if (current.dataset.sourceFile) {
+      return {
+        fileName: current.dataset.sourceFile,
+        lineNumber: parseInt(current.dataset.sourceLine || '0', 10),
+        componentName: current.dataset.componentName || 'Unknown'
+      };
+    }
+
+    current = current.parentElement;
   }
-  
+
   return null;
 }
 
 /**
- * Get the display name of a component from its fiber
+ * Helper to extract component name from fiber type
  */
 function getComponentName(fiber: FiberNode): string {
   const { type } = fiber;
-  
+
   if (!type) return 'Unknown';
-  
-  if (typeof type === 'string') {
-    return type; // Host component (div, span, etc.)
-  }
-  
+  if (typeof type === 'string') return type;
   if (typeof type === 'function') {
     return (type as { displayName?: string; name?: string }).displayName || type.name || 'Anonymous';
   }
-  
-  // Handle ForwardRef, Memo, etc.
   if (typeof type === 'object') {
-    if ('displayName' in type) {
-      return (type as { displayName: string }).displayName;
-    }
-    if ('render' in type && typeof (type as { render: Function }).render === 'function') {
-      const render = (type as { render: Function }).render;
-      return (render as { displayName?: string; name?: string }).displayName || render.name || 'ForwardRef';
-    }
-    if ('type' in type) {
-      return getComponentName({ ...fiber, type: (type as { type: FiberNode['type'] }).type });
-    }
+    // @ts-ignore
+    if (type.displayName) return type.displayName;
+    // @ts-ignore
+    if (type.type) return getComponentName({ ...fiber, type: type.type });
   }
-  
-  return 'Unknown';
-}
-
-/**
- * Extract props from a fiber node (sanitized for display)
- */
-function extractProps(fiber: FiberNode): Record<string, unknown> {
-  const props = fiber.memoizedProps || {};
-  const sanitized: Record<string, unknown> = {};
-  
-  for (const [key, value] of Object.entries(props)) {
-    // Skip children and internal props
-    if (key === 'children' || key.startsWith('__')) continue;
-    
-    // Sanitize values for display
-    if (typeof value === 'function') {
-      sanitized[key] = '[Function]';
-    } else if (typeof value === 'object' && value !== null) {
-      if (Array.isArray(value)) {
-        sanitized[key] = `[Array(${value.length})]`;
-      } else {
-        sanitized[key] = '[Object]';
-      }
-    } else {
-      sanitized[key] = value;
-    }
-  }
-  
-  return sanitized;
-}
-
-/**
- * Get the source file location for a component
- */
-function getSourceLocation(fiber: FiberNode): { fileName: string; lineNumber: number } | null {
-  // Check for debug source info (development builds)
-  if (fiber._debugSource) {
-    return {
-      fileName: fiber._debugSource.fileName,
-      lineNumber: fiber._debugSource.lineNumber
-    };
-  }
-  
-  // Try to get from component function
-  const { type } = fiber;
-  if (typeof type === 'function' && '__source' in type) {
-    const source = (type as { __source: { fileName: string; lineNumber: number } }).__source;
-    return source;
-  }
-  
-  return null;
+  return 'Anonymous';
 }
 
 /**
@@ -231,7 +159,7 @@ function createTooltip(): HTMLDivElement {
  */
 function positionOverlay(element: HTMLElement): void {
   if (!state.overlay) return;
-  
+
   const rect = element.getBoundingClientRect();
   state.overlay.style.top = `${rect.top}px`;
   state.overlay.style.left = `${rect.left}px`;
@@ -245,69 +173,54 @@ function positionOverlay(element: HTMLElement): void {
  */
 function positionTooltip(x: number, y: number, componentName: string, filePath?: string): void {
   if (!state.tooltip) return;
-  
+
   let html = `<span style="color: #10b981; font-weight: 600;">&lt;${componentName} /&gt;</span>`;
-  
+
   if (filePath) {
     const shortPath = filePath.split('/').slice(-2).join('/');
     html += `<br><span style="color: #64748b; font-size: 10px;">${shortPath}</span>`;
   }
-  
+
   state.tooltip.innerHTML = html;
-  
+
   // Position tooltip to avoid going off-screen
   const tooltipRect = state.tooltip.getBoundingClientRect();
   let tooltipX = x + 15;
   let tooltipY = y + 15;
-  
+
   if (tooltipX + tooltipRect.width > window.innerWidth) {
     tooltipX = x - tooltipRect.width - 15;
   }
-  
+
   if (tooltipY + tooltipRect.height > window.innerHeight) {
     tooltipY = y - tooltipRect.height - 15;
   }
-  
+
   state.tooltip.style.left = `${tooltipX}px`;
   state.tooltip.style.top = `${tooltipY}px`;
   state.tooltip.style.display = 'block';
 }
 
-/**
- * Hide overlay and tooltip
- */
-function hideHighlight(): void {
-  if (state.overlay) {
-    state.overlay.style.display = 'none';
-  }
-  if (state.tooltip) {
-    state.tooltip.style.display = 'none';
-  }
-}
+
 
 /**
  * Handle mouse move during inspection
  */
 function handleMouseMove(event: MouseEvent): void {
   if (!state.isInspecting) return;
-  
+
   const element = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
-  
+
   if (!element || element === state.hoveredElement) return;
   if (element.id === 'react-dev-insight-overlay' || element.id === 'react-dev-insight-tooltip') return;
-  
+
   state.hoveredElement = element;
-  
-  // Find React fiber
-  const fiber = findFiberNode(element);
-  const componentFiber = findNearestComponent(fiber);
-  
-  if (componentFiber) {
-    const name = getComponentName(componentFiber);
-    const source = getSourceLocation(componentFiber);
-    
+
+  const sourceInfo = getSourceFromElement(element);
+
+  if (sourceInfo) {
     positionOverlay(element);
-    positionTooltip(event.clientX, event.clientY, name, source?.fileName);
+    positionTooltip(event.clientX, event.clientY, sourceInfo.componentName, sourceInfo.fileName);
   } else {
     // Show native element info
     positionOverlay(element);
@@ -320,35 +233,25 @@ function handleMouseMove(event: MouseEvent): void {
  */
 function handleClick(event: MouseEvent): void {
   if (!state.isInspecting) return;
-  
+
   event.preventDefault();
   event.stopPropagation();
-  
-  const element = state.hoveredElement;
-  if (!element) return;
-  
-  // Find React component
-  const fiber = findFiberNode(element);
-  const componentFiber = findNearestComponent(fiber);
-  
-  if (componentFiber) {
-    const name = getComponentName(componentFiber);
-    const source = getSourceLocation(componentFiber);
-    const props = extractProps(componentFiber);
-    
-    // Send selection to parent frame
+
+  const element = state.hoveredElement || (event.target as HTMLElement);
+  const sourceInfo = getSourceFromElement(element);
+
+  if (sourceInfo) {
     window.parent.postMessage({
       type: 'ELEMENT_SELECTED',
       payload: {
-        componentName: name,
-        filePath: source?.fileName || 'Unknown',
-        lineNumber: source?.lineNumber,
-        props,
+        componentName: sourceInfo.componentName,
+        filePath: sourceInfo.fileName,
+        lineNumber: sourceInfo.lineNumber,
         tagName: element.tagName.toLowerCase()
       }
     }, '*');
   } else {
-    // Native element
+    // Fallback
     window.parent.postMessage({
       type: 'ELEMENT_SELECTED',
       payload: {
@@ -358,7 +261,7 @@ function handleClick(event: MouseEvent): void {
       }
     }, '*');
   }
-  
+
   stopInspection();
 }
 
@@ -377,18 +280,18 @@ function handleKeyDown(event: KeyboardEvent): void {
  */
 function startInspection(): void {
   if (state.isInspecting) return;
-  
+
   state.isInspecting = true;
   state.overlay = createOverlay();
   state.tooltip = createTooltip();
-  
+
   document.addEventListener('mousemove', handleMouseMove, true);
   document.addEventListener('click', handleClick, true);
   document.addEventListener('keydown', handleKeyDown, true);
-  
+
   // Change cursor
   document.body.style.cursor = 'crosshair';
-  
+
   window.parent.postMessage({ type: 'INSPECTION_STARTED' }, '*');
 }
 
@@ -397,17 +300,17 @@ function startInspection(): void {
  */
 function stopInspection(): void {
   if (!state.isInspecting) return;
-  
+
   state.isInspecting = false;
   state.hoveredElement = null;
-  
+
   document.removeEventListener('mousemove', handleMouseMove, true);
   document.removeEventListener('click', handleClick, true);
   document.removeEventListener('keydown', handleKeyDown, true);
-  
+
   // Restore cursor
   document.body.style.cursor = '';
-  
+
   // Remove overlay and tooltip
   if (state.overlay) {
     state.overlay.remove();
@@ -424,7 +327,7 @@ function stopInspection(): void {
  */
 function handleMessage(event: MessageEvent): void {
   const { type } = event.data || {};
-  
+
   switch (type) {
     case 'START_INSPECTION':
       startInspection();
@@ -444,10 +347,10 @@ function handleMessage(event: MessageEvent): void {
 function initialize(): void {
   // Listen for messages from parent
   window.addEventListener('message', handleMessage);
-  
+
   // Notify parent that injector is ready
   window.parent.postMessage({ type: 'INJECTOR_READY' }, '*');
-  
+
   console.log('[React Dev Insight Pro] Injector initialized');
 }
 
@@ -462,7 +365,5 @@ if (document.readyState === 'loading') {
 export {
   startInspection,
   stopInspection,
-  findFiberNode,
-  findNearestComponent,
-  getComponentName
+  getSourceFromElement
 };

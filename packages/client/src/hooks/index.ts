@@ -36,39 +36,39 @@ export function useElementSelection() {
     clearSelection,
     addNotification
   } = useStore();
-  
+
   // Listen for messages from the injector iframe
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === 'ELEMENT_SELECTED') {
         const { componentName, filePath, lineNumber, props, tagName } = event.data.payload || {};
-        
+
         if (componentName && filePath) {
           setSelectedElement({
             componentName,
             filePath,
-            lineNumber,
-            props,
+            ...(lineNumber ? { lineNumber } : {}),
+            ...(props ? { props } : {}),
             tagName: tagName || 'div'
           });
           setInspecting(false);
           addNotification('success', `Selected: ${componentName}`);
         }
       }
-      
+
       if (event.data?.type === 'INSPECTION_STARTED') {
         setInspecting(true);
       }
-      
+
       if (event.data?.type === 'INSPECTION_CANCELLED') {
         setInspecting(false);
       }
     }
-    
-    window.addEventListener('message', handleMessage as EventListener);
-    return () => window.removeEventListener('message', handleMessage as EventListener);
+
+    window.addEventListener('message', handleMessage as unknown as EventListener);
+    return () => window.removeEventListener('message', handleMessage as unknown as EventListener);
   }, [setSelectedElement, setInspecting, addNotification]);
-  
+
   const startInspection = useCallback(() => {
     // Send message to injector iframe to start inspection mode
     const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
@@ -79,7 +79,7 @@ export function useElementSelection() {
       addNotification('error', 'Target application not connected');
     }
   }, [setInspecting, addNotification]);
-  
+
   const stopInspection = useCallback(() => {
     const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
     if (iframe?.contentWindow) {
@@ -87,7 +87,7 @@ export function useElementSelection() {
     }
     setInspecting(false);
   }, [setInspecting]);
-  
+
   return {
     selectedElement,
     isInspecting,
@@ -116,7 +116,7 @@ export function useCodeAnalysis() {
     toggleCategory,
     addNotification
   } = useStore();
-  
+
   const analyzeSelected = useCallback(async (
     goal?: OptimizationCategory | string
   ) => {
@@ -124,26 +124,26 @@ export function useCodeAnalysis() {
       addNotification('error', 'No project path configured');
       return;
     }
-    
+
     if (!selectedElement) {
       addNotification('error', 'No element selected');
       return;
     }
-    
+
     setAnalyzing(true);
     setAnalysisError(null);
-    
+
     try {
       const result = await api.analyzeElement({
         projectPath,
         componentInfo: {
           name: selectedElement.componentName,
           filePath: selectedElement.filePath,
-          lineNumber: selectedElement.lineNumber
+          ...(selectedElement.lineNumber ? { lineNumber: selectedElement.lineNumber } : {})
         },
         goal: goal || selectedCategories[0] || 'performance'
       });
-      
+
       setAnalysisResult(result);
       addNotification('success', `Found ${result.suggestions.length} suggestions`);
     } catch (error) {
@@ -160,16 +160,16 @@ export function useCodeAnalysis() {
     setAnalysisResult,
     addNotification
   ]);
-  
+
   const analyzeFile = useCallback(async (filePath: string, goal?: string) => {
     if (!projectPath) {
       addNotification('error', 'No project path configured');
       return;
     }
-    
+
     setAnalyzing(true);
     setAnalysisError(null);
-    
+
     try {
       const result = await api.analyzeFile(projectPath, filePath, goal);
       setAnalysisResult(result);
@@ -180,7 +180,7 @@ export function useCodeAnalysis() {
       addNotification('error', message);
     }
   }, [projectPath, setAnalyzing, setAnalysisError, setAnalysisResult, addNotification]);
-  
+
   return {
     analysisResult,
     isAnalyzing,
@@ -210,7 +210,7 @@ export function useModifications() {
     closeApprovalDialog,
     addNotification
   } = useStore();
-  
+
   const applySuggestion = useCallback(async (
     suggestion: CodeSuggestion,
     filePath: string
@@ -219,10 +219,10 @@ export function useModifications() {
       addNotification('error', 'No project path configured');
       return null;
     }
-    
+
     try {
       const result = await api.applySuggestion(projectPath, filePath, suggestion);
-      
+
       if (result.success) {
         markSuggestionApplied(suggestion.id);
         addModificationEntry({
@@ -231,13 +231,13 @@ export function useModifications() {
           filePath,
           suggestion,
           status: 'applied',
-          commitHash: result.commitHash,
-          backupId: result.backupId
+          ...(result.commitHash ? { commitHash: result.commitHash } : {}),
+          ...(result.backupId ? { backupId: result.backupId } : {})
         });
         addNotification('success', 'Change applied successfully');
         closeApprovalDialog();
       }
-      
+
       return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to apply change';
@@ -251,7 +251,7 @@ export function useModifications() {
     closeApprovalDialog,
     addNotification
   ]);
-  
+
   const applyMultiple = useCallback(async (
     suggestions: CodeSuggestion[],
     filePath: string
@@ -260,19 +260,19 @@ export function useModifications() {
       addNotification('error', 'No project path configured');
       return null;
     }
-    
+
     try {
       const result = await api.applyMultipleSuggestions(
         projectPath,
         filePath,
         suggestions
       );
-      
+
       if (result.success) {
         suggestions.forEach(s => markSuggestionApplied(s.id));
         addNotification('success', `Applied ${suggestions.length} changes`);
       }
-      
+
       return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to apply changes';
@@ -280,20 +280,20 @@ export function useModifications() {
       return null;
     }
   }, [projectPath, markSuggestionApplied, addNotification]);
-  
+
   const revert = useCallback(async (modificationId: string) => {
     if (!projectPath) {
       addNotification('error', 'No project path configured');
       return false;
     }
-    
+
     try {
       const result = await api.revertModification(projectPath, modificationId);
-      
+
       if (result.reverted) {
         addNotification('success', 'Change reverted successfully');
       }
-      
+
       return result.reverted;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to revert';
@@ -301,14 +301,14 @@ export function useModifications() {
       return false;
     }
   }, [projectPath, addNotification]);
-  
+
   const preview = useCallback(async (
     filePath: string,
     originalCode: string,
     modifiedCode: string
   ) => {
     if (!projectPath) return null;
-    
+
     try {
       return await api.previewModification(
         projectPath,
@@ -322,7 +322,7 @@ export function useModifications() {
       return null;
     }
   }, [projectPath, addNotification]);
-  
+
   return {
     selectedSuggestion,
     appliedSuggestions,
@@ -348,10 +348,10 @@ export function useGitOperations() {
     setGitStatus,
     addNotification
   } = useStore();
-  
+
   const refreshStatus = useCallback(async () => {
     if (!projectPath) return;
-    
+
     try {
       const status = await api.getGitStatus(projectPath);
       setGitStatus(status);
@@ -360,23 +360,23 @@ export function useGitOperations() {
       addNotification('error', message);
     }
   }, [projectPath, setGitStatus, addNotification]);
-  
+
   // Auto-refresh status periodically
   useEffect(() => {
     if (!projectPath) return;
-    
+
     refreshStatus();
     const interval = setInterval(refreshStatus, 30000); // Every 30 seconds
-    
+
     return () => clearInterval(interval);
   }, [projectPath, refreshStatus]);
-  
+
   const createBranch = useCallback(async (name: string) => {
     if (!projectPath) {
       addNotification('error', 'No project path configured');
       return null;
     }
-    
+
     try {
       const result = await api.createBranch(projectPath, name);
       addNotification('success', `Created branch: ${result.branchName}`);
@@ -388,13 +388,13 @@ export function useGitOperations() {
       return null;
     }
   }, [projectPath, addNotification, refreshStatus]);
-  
+
   const commit = useCallback(async (message: string, files?: string[]) => {
     if (!projectPath) {
       addNotification('error', 'No project path configured');
       return null;
     }
-    
+
     try {
       const result = await api.commitChanges(projectPath, message, files);
       addNotification('success', 'Changes committed');
@@ -406,13 +406,13 @@ export function useGitOperations() {
       return null;
     }
   }, [projectPath, addNotification, refreshStatus]);
-  
+
   const revertCommit = useCallback(async (hash: string) => {
     if (!projectPath) {
       addNotification('error', 'No project path configured');
       return false;
     }
-    
+
     try {
       await api.revertCommit(projectPath, hash);
       addNotification('success', 'Commit reverted');
@@ -424,17 +424,17 @@ export function useGitOperations() {
       return false;
     }
   }, [projectPath, addNotification, refreshStatus]);
-  
+
   const getHistory = useCallback(async (filePath?: string, limit?: number) => {
     if (!projectPath) return [];
-    
+
     try {
       return await api.getGitHistory(projectPath, filePath, limit);
     } catch {
       return [];
     }
   }, [projectPath]);
-  
+
   return {
     gitStatus,
     refreshStatus,
@@ -455,28 +455,28 @@ export function useWebSocket(url: string) {
     setConnected,
     addNotification
   } = useStore();
-  
+
   useEffect(() => {
     const ws = new WebSocket(url);
     wsRef.current = ws;
-    
+
     ws.onopen = () => {
       setConnected(true);
       addNotification('info', 'Connected to server');
     };
-    
+
     ws.onclose = () => {
       setConnected(false);
     };
-    
+
     ws.onerror = () => {
       addNotification('error', 'WebSocket connection error');
     };
-    
+
     ws.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
-        
+
         // Handle different message types
         switch (message.type) {
           case 'FILE_CHANGED':
@@ -492,18 +492,18 @@ export function useWebSocket(url: string) {
         console.error('Failed to parse WebSocket message');
       }
     };
-    
+
     return () => {
       ws.close();
     };
   }, [url, setConnected, addNotification]);
-  
+
   const send = useCallback((type: string, payload: unknown) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type, payload }));
     }
   }, []);
-  
+
   return { send };
 }
 
@@ -512,16 +512,16 @@ export function useWebSocket(url: string) {
 // ============================================
 
 export function useKeyboardShortcuts() {
-  const { 
-    startInspection, 
-    stopInspection, 
-    isInspecting 
+  const {
+    startInspection,
+    stopInspection,
+    isInspecting
   } = useElementSelection();
-  
+
   const { analyzeSelected } = useCodeAnalysis();
-  
+
   const { setActivePanel } = useStore();
-  
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       // Ignore if user is typing in an input
@@ -531,7 +531,7 @@ export function useKeyboardShortcuts() {
       ) {
         return;
       }
-      
+
       // Cmd/Ctrl + Shift + I - Toggle inspection
       if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'i') {
         event.preventDefault();
@@ -541,30 +541,33 @@ export function useKeyboardShortcuts() {
           startInspection();
         }
       }
-      
+
       // Cmd/Ctrl + Enter - Analyze selected
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
         event.preventDefault();
         analyzeSelected();
       }
-      
+
       // Escape - Cancel inspection or close dialogs
       if (event.key === 'Escape') {
         if (isInspecting) {
           stopInspection();
         }
       }
-      
+
       // Number keys 1-4 for panel switching
       if (event.key >= '1' && event.key <= '4' && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
         const panels: Array<'inspector' | 'analysis' | 'history' | 'settings'> = [
           'inspector', 'analysis', 'history', 'settings'
         ];
-        setActivePanel(panels[parseInt(event.key) - 1]);
+        const panel = panels[parseInt(event.key) - 1];
+        if (panel) {
+          setActivePanel(panel);
+        }
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [

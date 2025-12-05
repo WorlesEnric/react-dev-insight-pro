@@ -7,10 +7,8 @@ import type { GitStatus, GitCommit, GitDiff } from '../types/index.js';
  */
 export class GitService {
   private git: SimpleGit;
-  private projectPath: string;
 
   constructor(projectPath: string) {
-    this.projectPath = projectPath;
     this.git = simpleGit(projectPath);
   }
 

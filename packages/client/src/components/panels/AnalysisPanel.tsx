@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { Button, Badge, Card, Spinner, DiffViewer, CodeBlock } from '../ui';
+import { Button, Badge, Card, Spinner, DiffViewer } from '../ui';
 import { useCodeAnalysis, useModifications } from '../../hooks';
 import { useStore, useAnalysisResult, useSelectedSuggestion } from '../../stores';
 import type { CodeSuggestion, OptimizationCategory } from '../../types';
@@ -18,12 +18,6 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
-const ChevronDownIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-  </svg>
-);
-
 const CheckIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -32,8 +26,8 @@ const CheckIcon = () => (
 
 const SparklesIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
     />
   </svg>
 );
@@ -61,17 +55,17 @@ interface SuggestionCardProps {
   onApply: () => void;
 }
 
-function SuggestionCard({ 
-  suggestion, 
-  isSelected, 
+function SuggestionCard({
+  suggestion,
+  isSelected,
   isApplied,
-  onClick, 
-  onApply 
+  onClick,
+  onApply
 }: SuggestionCardProps) {
   const [expanded, setExpanded] = useState(isSelected);
   const color = categoryColors[suggestion.category] || 'slate';
   const priority = priorityConfig[suggestion.priority];
-  
+
   return (
     <Card
       className={`
@@ -94,10 +88,10 @@ function SuggestionCard({
         `}>
           <ChevronRightIcon />
         </span>
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Badge 
+            <Badge
               variant={suggestion.priority === 'high' ? 'error' : suggestion.priority === 'medium' ? 'warning' : 'default'}
               size="sm"
             >
@@ -112,19 +106,19 @@ function SuggestionCard({
               </Badge>
             )}
           </div>
-          
+
           <h4 className="text-sm font-medium text-slate-200 mb-1">
             {suggestion.title}
           </h4>
-          
+
           <p className="text-xs text-slate-400 line-clamp-2">
             {suggestion.description}
           </p>
-          
+
           {suggestion.confidence && (
             <div className="mt-2 flex items-center gap-2">
               <div className="flex-1 h-1 bg-slate-700 rounded-full overflow-hidden">
-                <div 
+                <div
                   className={`h-full bg-${color}-500 transition-all duration-500`}
                   style={{ width: `${suggestion.confidence * 100}%` }}
                 />
@@ -136,7 +130,7 @@ function SuggestionCard({
           )}
         </div>
       </button>
-      
+
       {/* Expanded content */}
       {expanded && (
         <div className="px-4 pb-4 space-y-4 border-t border-slate-700/50 pt-4 ml-7">
@@ -149,7 +143,7 @@ function SuggestionCard({
               {suggestion.explanation}
             </p>
           </div>
-          
+
           {/* Code diff */}
           <div>
             <h5 className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
@@ -161,14 +155,14 @@ function SuggestionCard({
               className="max-h-[300px]"
             />
           </div>
-          
+
           {/* Location info */}
           {suggestion.lineRange && (
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <span>Lines {suggestion.lineRange.start}–{suggestion.lineRange.end}</span>
             </div>
           )}
-          
+
           {/* Apply button */}
           <div className="flex items-center gap-2 pt-2">
             <Button
@@ -183,7 +177,7 @@ function SuggestionCard({
             >
               {isApplied ? 'Applied' : 'Apply Change'}
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -205,27 +199,27 @@ export function AnalysisPanel() {
   const analysisResult = useAnalysisResult();
   const selectedSuggestion = useSelectedSuggestion();
   const { isAnalyzing, analysisError } = useCodeAnalysis();
-  const { 
-    appliedSuggestions, 
-    selectSuggestion, 
-    openApprovalDialog 
+  const {
+    appliedSuggestions,
+    selectSuggestion,
+    openApprovalDialog
   } = useModifications();
   const selectedElement = useStore(state => state.selectedElement);
-  
+
   // Filter and sort suggestions
   const [filterCategory, setFilterCategory] = useState<OptimizationCategory | 'all'>('all');
   const [sortBy, setSortBy] = useState<'priority' | 'confidence'>('priority');
-  
+
   const filteredSuggestions = React.useMemo(() => {
     if (!analysisResult?.suggestions) return [];
-    
+
     let suggestions = [...analysisResult.suggestions];
-    
+
     // Filter
     if (filterCategory !== 'all') {
       suggestions = suggestions.filter(s => s.category === filterCategory);
     }
-    
+
     // Sort
     suggestions.sort((a, b) => {
       if (sortBy === 'priority') {
@@ -234,10 +228,10 @@ export function AnalysisPanel() {
       }
       return (b.confidence || 0) - (a.confidence || 0);
     });
-    
+
     return suggestions;
   }, [analysisResult?.suggestions, filterCategory, sortBy]);
-  
+
   // Loading state
   if (isAnalyzing) {
     return (
@@ -252,15 +246,15 @@ export function AnalysisPanel() {
       </div>
     );
   }
-  
+
   // Error state
   if (analysisError) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-8 text-center">
         <div className="w-16 h-16 mb-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
           <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
         </div>
@@ -273,7 +267,7 @@ export function AnalysisPanel() {
       </div>
     );
   }
-  
+
   // Empty state
   if (!analysisResult) {
     return (
@@ -285,7 +279,7 @@ export function AnalysisPanel() {
           No Analysis Yet
         </h3>
         <p className="text-xs text-slate-500 max-w-[250px]">
-          {selectedElement 
+          {selectedElement
             ? 'Click "Analyze Component" to get AI-powered suggestions.'
             : 'Select a component to analyze it for optimization opportunities.'
           }
@@ -293,7 +287,7 @@ export function AnalysisPanel() {
       </div>
     );
   }
-  
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -307,14 +301,14 @@ export function AnalysisPanel() {
             {filteredSuggestions.length} suggestions
           </Badge>
         </div>
-        
+
         {/* Summary */}
         {analysisResult.analysis && (
           <p className="text-sm text-slate-400 mb-4">
             {analysisResult.analysis.summary}
           </p>
         )}
-        
+
         {/* Filters */}
         <div className="flex items-center gap-2">
           <select
@@ -330,7 +324,7 @@ export function AnalysisPanel() {
             <option value="ux">UX</option>
             <option value="code-quality">Code Quality</option>
           </select>
-          
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'priority' | 'confidence')}
@@ -341,7 +335,7 @@ export function AnalysisPanel() {
           </select>
         </div>
       </div>
-      
+
       {/* Suggestions List */}
       <div className="flex-1 overflow-auto p-4 space-y-3">
         {filteredSuggestions.length > 0 ? (
@@ -363,7 +357,7 @@ export function AnalysisPanel() {
           </div>
         )}
       </div>
-      
+
       {/* Batch Apply */}
       {filteredSuggestions.filter(s => !appliedSuggestions.includes(s.id)).length > 1 && (
         <div className="flex-shrink-0 p-4 border-t border-slate-700/50 bg-slate-800/30">

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { 
+import {
   ElementInspector,
   AnalysisPanel,
   HistoryPanel,
@@ -22,32 +22,32 @@ import { useKeyboardShortcuts, useGitOperations } from './hooks';
 // Icons
 const InspectorIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
     />
   </svg>
 );
 
 const SparklesIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
     />
   </svg>
 );
 
 const HistoryIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
     />
   </svg>
 );
 
 const SettingsIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
     />
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
@@ -55,8 +55,8 @@ const SettingsIcon = () => (
 
 const GitBranchIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 9v10m8-6a3 3 0 100-6 3 3 0 000 6zm0 0v2a2 2 0 01-2 2H10" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 9v10m8-6a3 3 0 100-6 3 3 0 000 6zm0 0v2a2 2 0 01-2 2H10"
     />
   </svg>
 );
@@ -64,17 +64,17 @@ const GitBranchIcon = () => (
 const LogoIcon = () => (
   <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
     <rect width="32" height="32" rx="8" className="fill-emerald-500/20" />
-    <path 
-      d="M16 6L26 12V20L16 26L6 20V12L16 6Z" 
-      className="stroke-emerald-400" 
-      strokeWidth="1.5" 
+    <path
+      d="M16 6L26 12V20L16 26L6 20V12L16 6Z"
+      className="stroke-emerald-400"
+      strokeWidth="1.5"
       fill="none"
     />
     <circle cx="16" cy="16" r="4" className="fill-emerald-400" />
-    <path 
-      d="M16 12V8M20 14L23 12M20 18L23 20M16 20V24M12 18L9 20M12 14L9 12" 
-      className="stroke-emerald-400" 
-      strokeWidth="1.5" 
+    <path
+      d="M16 12V8M20 14L23 12M20 18L23 20M16 20V24M12 18L9 20M12 14L9 12"
+      className="stroke-emerald-400"
+      strokeWidth="1.5"
       strokeLinecap="round"
     />
   </svg>
@@ -95,27 +95,27 @@ function Sidebar() {
   const gitStatus = useGitStatus();
   const { modificationHistory } = useStore();
   const analysisResult = useStore(state => state.analysisResult);
-  
+
   return (
     <div className="w-16 h-full bg-slate-900/50 border-r border-slate-700/50 flex flex-col items-center py-4">
       {/* Logo */}
       <div className="mb-6">
         <LogoIcon />
       </div>
-      
+
       {/* Navigation */}
       <nav className="flex-1 flex flex-col items-center gap-2">
         {navItems.map((item) => {
           const isActive = activePanel === item.id;
           let badge: number | undefined;
-          
+
           if (item.id === 'analysis' && analysisResult?.suggestions) {
             badge = analysisResult.suggestions.length;
           }
           if (item.id === 'history' && modificationHistory.length > 0) {
             badge = modificationHistory.length;
           }
-          
+
           return (
             <div key={item.id} className="relative">
               <IconButton
@@ -133,14 +133,14 @@ function Sidebar() {
           );
         })}
       </nav>
-      
+
       {/* Git Status Indicator */}
       {gitStatus && (
         <div className="mt-auto pt-4">
           <div className={`
             p-2 rounded-lg
-            ${gitStatus.isClean 
-              ? 'bg-emerald-500/10 text-emerald-400' 
+            ${gitStatus.isClean
+              ? 'bg-emerald-500/10 text-emerald-400'
               : 'bg-amber-500/10 text-amber-400'
             }
           `}>
@@ -154,7 +154,7 @@ function Sidebar() {
 
 function PanelContent() {
   const activePanel = useActivePanel();
-  
+
   return (
     <div className="h-full">
       {activePanel === 'inspector' && <ElementInspector />}
@@ -170,7 +170,7 @@ function StatusBar() {
   const isConnected = useStore(state => state.isConnected);
   const projectPath = useStore(state => state.projectPath);
   const isAnalyzing = useStore(state => state.isAnalyzing);
-  
+
   return (
     <div className="h-8 bg-slate-900/80 border-t border-slate-700/50 px-4 flex items-center justify-between text-xs">
       <div className="flex items-center gap-4">
@@ -181,7 +181,7 @@ function StatusBar() {
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
         </div>
-        
+
         {/* Project Path */}
         {projectPath && (
           <>
@@ -191,7 +191,7 @@ function StatusBar() {
             </span>
           </>
         )}
-        
+
         {/* Git Branch */}
         {gitStatus?.branch && (
           <>
@@ -206,7 +206,7 @@ function StatusBar() {
           </>
         )}
       </div>
-      
+
       <div className="flex items-center gap-4">
         {/* Analysis Status */}
         {isAnalyzing && (
@@ -218,7 +218,7 @@ function StatusBar() {
             Analyzing...
           </span>
         )}
-        
+
         {/* Version */}
         <span className="text-slate-600">v1.0.0</span>
       </div>
@@ -228,94 +228,51 @@ function StatusBar() {
 
 function TargetAppFrame() {
   const [targetUrl, setTargetUrl] = useState('');
-  const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState<'loading' | 'connected' | 'setup_required' | 'error'>('loading');
   const projectPath = useStore(state => state.projectPath);
   const addNotification = useStore(state => state.addNotification);
-  
+
   // Default to localhost:3000 or configured URL
   useEffect(() => {
     const url = localStorage.getItem('targetAppUrl') || 'http://localhost:3000';
     setTargetUrl(url);
   }, []);
-  
-  // Handle iframe load events
+
+  // Listen for handshake from the injector
   useEffect(() => {
-    const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
-    if (!iframe) return;
-    
-    const handleLoad = () => {
-      setIsLoading(false);
-      setConnectionError(null);
-      
-      // Try to inject the injector script
-      const injectScript = async () => {
-        try {
-          const iframeWindow = iframe.contentWindow;
-          const iframeDocument = iframe.contentDocument || iframeWindow?.document;
-          
-          if (iframeDocument) {
-            // Check if injector already exists
-            if (iframeDocument.getElementById('react-dev-insight-injector')) {
-              return; // Already injected
-            }
-            
-            // Fetch and inject the injector script inline
-            try {
-              const response = await fetch('/injector.js');
-              const scriptContent = await response.text();
-              
-              const script = iframeDocument.createElement('script');
-              script.id = 'react-dev-insight-injector';
-              script.textContent = scriptContent;
-              iframeDocument.head.appendChild(script);
-              
-              console.log('[React Dev Insight Pro] Injector script injected successfully');
-              addNotification('success', 'Injector script loaded');
-            } catch (fetchError) {
-              console.error('[React Dev Insight Pro] Failed to fetch injector script:', fetchError);
-              addNotification('error', 'Failed to load injector script. Use Chrome DevTools instead.');
-            }
-          }
-        } catch (error) {
-          // Cross-origin restrictions - this is expected if the React app is on a different origin
-          console.warn('[React Dev Insight Pro] Cannot access iframe content (cross-origin):', error);
-          addNotification('warning', 'Cross-origin restrictions detected. Use Chrome DevTools instead.');
-        }
-      };
-      
-      injectScript();
-    };
-    
-    const handleError = () => {
-      setIsLoading(false);
-      setConnectionError('CONNECTION_REFUSED');
-    };
-    
-    iframe.addEventListener('load', handleLoad);
-    iframe.addEventListener('error', handleError);
-    
-    // Set a timeout to detect connection issues
-    const timeout = setTimeout(() => {
-      if (isLoading) {
-        setConnectionError('TIMEOUT');
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'INJECTOR_READY') {
+        setStatus('connected');
+        addNotification('success', 'Target app connected successfully');
       }
-    }, 5000);
-    
-    return () => {
-      iframe.removeEventListener('load', handleLoad);
-      iframe.removeEventListener('error', handleError);
-      clearTimeout(timeout);
     };
-  }, [targetUrl, isLoading, addNotification]);
-  
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [addNotification]);
+
+  // Handle iframe load events
+  const handleLoad = () => {
+    // If we are not already connected, wait for handshake
+    if (status !== 'connected') {
+      // Give it a moment to send the ready message
+      setTimeout(() => {
+        setStatus(prev => prev === 'connected' ? 'connected' : 'setup_required');
+      }, 2000);
+    }
+  };
+
+  const handleError = () => {
+    setStatus('error');
+  };
+
   if (!projectPath) {
     return (
       <div className="h-full flex flex-col items-center justify-center bg-slate-900/30 text-center p-8">
         <div className="w-20 h-20 mb-6 rounded-2xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center">
           <svg className="w-10 h-10 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
-              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" 
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
             />
           </svg>
         </div>
@@ -333,13 +290,13 @@ function TargetAppFrame() {
       </div>
     );
   }
-  
+
   return (
     <div className="h-full flex flex-col">
       {/* URL Bar */}
       <div className="flex-shrink-0 h-10 bg-slate-800/50 border-b border-slate-700/50 px-4 flex items-center gap-2">
         <div className="flex items-center gap-1">
-          <button 
+          <button
             className="p-1 text-slate-500 hover:text-slate-300 transition-colors"
             onClick={() => {
               const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
@@ -352,7 +309,7 @@ function TargetAppFrame() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button 
+          <button
             className="p-1 text-slate-500 hover:text-slate-300 transition-colors"
             onClick={() => {
               const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
@@ -365,12 +322,13 @@ function TargetAppFrame() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-          <button 
+          <button
             className="p-1 text-slate-500 hover:text-slate-300 transition-colors"
             onClick={() => {
               const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
               if (iframe) {
                 iframe.src = iframe.src;
+                setStatus('loading');
               }
             }}
           >
@@ -379,30 +337,30 @@ function TargetAppFrame() {
             </svg>
           </button>
         </div>
-        
+
         <input
           type="text"
           value={targetUrl}
           onChange={(e) => {
             setTargetUrl(e.target.value);
-            setConnectionError(null);
-            setIsLoading(true);
+            setStatus('loading');
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               localStorage.setItem('targetAppUrl', targetUrl);
-              setIsLoading(true);
-              setConnectionError(null);
+              setStatus('loading');
+              const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
+              if (iframe) iframe.src = targetUrl;
             }
           }}
           className="flex-1 px-3 py-1.5 bg-slate-900/50 border border-slate-700/50 rounded-md text-sm text-slate-300 font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
           placeholder="http://localhost:3000"
         />
       </div>
-      
+
       {/* Iframe */}
       <div className="flex-1 relative">
-        {connectionError && (
+        {status === 'error' && (
           <div className="absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-8 z-10">
             <div className="w-16 h-16 mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
               <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -411,56 +369,11 @@ function TargetAppFrame() {
             </div>
             <h3 className="text-lg font-semibold text-slate-200 mb-2">Connection Failed</h3>
             <p className="text-sm text-slate-400 mb-6 text-center max-w-md">
-              {connectionError === 'CONNECTION_REFUSED' 
-                ? 'Unable to connect to the React app. This is usually caused by X-Frame-Options blocking iframe embedding.'
-                : 'Connection timeout. Please check if your React dev server is running.'}
+              Unable to connect to the React app. This is usually caused by the server not running or X-Frame-Options blocking.
             </p>
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-4 max-w-2xl w-full text-left">
-              <h4 className="text-sm font-semibold text-slate-300 mb-3">To fix this issue:</h4>
-              <ol className="text-xs text-slate-400 space-y-2 list-decimal list-inside">
-                <li className="ml-2">
-                  <strong className="text-slate-300">For Create React App:</strong> Add this to your <code className="bg-slate-900 px-1 rounded">public/index.html</code>:
-                  <pre className="mt-1 bg-slate-900 p-2 rounded text-xs overflow-x-auto">
-{`<meta http-equiv="X-Frame-Options" content="ALLOW-FROM http://localhost:5173">
-<meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' http://localhost:5173;">`}
-                  </pre>
-                </li>
-                <li className="ml-2">
-                  <strong className="text-slate-300">For Vite:</strong> Add this to your <code className="bg-slate-900 px-1 rounded">index.html</code>:
-                  <pre className="mt-1 bg-slate-900 p-2 rounded text-xs overflow-x-auto">
-{`<meta http-equiv="X-Frame-Options" content="ALLOW-FROM http://localhost:5173">
-<meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' http://localhost:5173;">`}
-                  </pre>
-                </li>
-                <li className="ml-2">
-                  <strong className="text-slate-300">For Next.js:</strong> Add this to <code className="bg-slate-900 px-1 rounded">next.config.js</code>:
-                  <pre className="mt-1 bg-slate-900 p-2 rounded text-xs overflow-x-auto">
-{`headers: async () => [
-  {
-    source: '/:path*',
-    headers: [
-      {
-        key: 'X-Frame-Options',
-        value: 'ALLOW-FROM http://localhost:5173'
-      },
-      {
-        key: 'Content-Security-Policy',
-        value: "frame-ancestors 'self' http://localhost:5173"
-      }
-    ]
-  }
-]`}
-                  </pre>
-                </li>
-                <li className="ml-2">
-                  Make sure your React dev server is running on <code className="bg-slate-900 px-1 rounded">{targetUrl}</code>
-                </li>
-              </ol>
-            </div>
             <button
               onClick={() => {
-                setConnectionError(null);
-                setIsLoading(true);
+                setStatus('loading');
                 const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
                 if (iframe) {
                   iframe.src = targetUrl;
@@ -472,8 +385,8 @@ function TargetAppFrame() {
             </button>
           </div>
         )}
-        
-        {isLoading && !connectionError && (
+
+        {status === 'loading' && (
           <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center z-10">
             <div className="text-center">
               <svg className="w-8 h-8 animate-spin text-emerald-400 mx-auto mb-2" viewBox="0 0 24 24">
@@ -484,19 +397,90 @@ function TargetAppFrame() {
             </div>
           </div>
         )}
-        
+
+        {status === 'setup_required' && (
+          <div className="absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-8 z-10 overflow-y-auto">
+            <div className="max-w-3xl w-full">
+              <h3 className="text-xl font-semibold text-slate-200 mb-4 text-center">Setup Required</h3>
+              <p className="text-slate-400 mb-8 text-center max-w-xl mx-auto">
+                To enable inspection, you need to add the helper script and Babel plugin to your React application.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">1</div>
+                    <h4 className="font-medium text-slate-200">Add Babel Plugin</h4>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-4">
+                    Add <code className="text-emerald-400">@babel/plugin-transform-react-jsx-source</code> to your Babel/Vite config to bake in source data.
+                  </p>
+                  <pre className="bg-slate-950 p-3 rounded text-xs overflow-x-auto text-slate-300">
+                    {`// vite.config.ts
+export default defineConfig({
+plugins: [
+  react({
+    babel: {
+      plugins: [
+        "@babel/plugin-transform-react-jsx-source"
+      ]
+    }
+  })
+]
+})`}
+                  </pre>
+                </div>
+
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">2</div>
+                    <h4 className="font-medium text-slate-200">Add Injector Script</h4>
+                  </div>
+                  <p className="text-sm text-slate-400 mb-4">
+                    Add the injector script to your <code className="text-emerald-400">index.html</code> (dev only).
+                  </p>
+                  <pre className="bg-slate-950 p-3 rounded text-xs overflow-x-auto text-slate-300">
+                    {`<!-- index.html -->
+<script>
+(function() {
+  const script = document.createElement('script');
+  script.src = "http://localhost:5173/injector.js";
+  document.head.appendChild(script);
+})();
+</script>`}
+                  </pre>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => {
+                    setStatus('loading');
+                    const iframe = document.querySelector<HTMLIFrameElement>('#target-app-iframe');
+                    if (iframe) iframe.src = iframe.src;
+                  }}
+                  className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md font-medium transition-colors"
+                >
+                  I've Added It, Retry Connection
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <iframe
           id="target-app-iframe"
           src={targetUrl}
           className="w-full h-full border-0 bg-white"
           title="Target Application"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
-          onLoad={() => setIsLoading(false)}
+          onLoad={handleLoad}
+          onError={handleError}
         />
-        
+
         {/* Overlay for inspection mode */}
-        <div 
-          id="inspection-overlay" 
+        <div
+          id="inspection-overlay"
           className="absolute inset-0 pointer-events-none"
           style={{ display: 'none' }}
         />
@@ -508,35 +492,35 @@ function TargetAppFrame() {
 export default function App() {
   // Initialize keyboard shortcuts
   useKeyboardShortcuts();
-  
+
   // Initialize Git operations
   const { refreshStatus } = useGitOperations();
-  
+
   useEffect(() => {
     refreshStatus();
   }, [refreshStatus]);
-  
+
   return (
     <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <Sidebar />
-        
+
         {/* Left Panel */}
         <div className="w-80 h-full bg-slate-900/30 border-r border-slate-700/50 flex-shrink-0 overflow-hidden">
           <PanelContent />
         </div>
-        
+
         {/* Main Area - Target App */}
         <div className="flex-1 overflow-hidden">
           <TargetAppFrame />
         </div>
       </div>
-      
+
       {/* Status Bar */}
       <StatusBar />
-      
+
       {/* Modals & Overlays */}
       <ApprovalDialog />
       <Notifications />

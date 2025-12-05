@@ -18,7 +18,7 @@ import { APIResponse } from './types';
  */
 export async function createApp(): Promise<Express> {
   const app = express();
-  const config = await loadConfig();
+  await loadConfig();
 
   // Security middleware
   app.use(helmet({
@@ -42,7 +42,7 @@ export async function createApp(): Promise<Express> {
       ];
 
       const isAllowed = allowedOrigins.some(pattern => pattern.test(origin));
-      
+
       if (isAllowed) {
         callback(null, true);
       } else {
@@ -73,7 +73,7 @@ export async function createApp(): Promise<Express> {
   });
 
   // Project path header middleware
-  app.use((req: Request, res: Response, next: NextFunction) => {
+  app.use((req: Request, _res: Response, next: NextFunction) => {
     // Allow project path to be passed via header
     const projectPathHeader = req.headers['x-project-path'];
     if (projectPathHeader && typeof projectPathHeader === 'string') {
@@ -98,7 +98,7 @@ export async function createApp(): Promise<Express> {
   });
 
   // Global error handler
-  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('Unhandled error:', err);
 
     // Handle CORS errors
@@ -142,8 +142,8 @@ export async function createApp(): Promise<Express> {
       success: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: process.env.NODE_ENV === 'development' 
-          ? err.message 
+        message: process.env.NODE_ENV === 'development'
+          ? err.message
           : 'Internal server error'
       }
     };

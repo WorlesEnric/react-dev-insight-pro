@@ -5,58 +5,58 @@
  * and revert changes.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Badge, Card, Spinner } from '../ui';
 import { useStore } from '../../stores';
 import { useModifications, useGitOperations } from '../../hooks';
-import * as api from '../../services/api';
+
 import type { ModificationEntry } from '../../types';
 
 // Icons
 const HistoryIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
     />
   </svg>
 );
 
 const RevertIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
     />
   </svg>
 );
 
 const CheckCircleIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
     />
   </svg>
 );
 
 const XCircleIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
     />
   </svg>
 );
 
 const FileIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
     />
   </svg>
 );
 
 const GitCommitIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
     />
   </svg>
 );
@@ -65,7 +65,7 @@ function formatTime(timestamp: number): string {
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
-  
+
   if (diff < 60000) {
     return 'Just now';
   } else if (diff < 3600000) {
@@ -87,15 +87,15 @@ interface HistoryItemProps {
 
 function HistoryItem({ entry, onRevert, isReverting }: HistoryItemProps) {
   const [expanded, setExpanded] = useState(false);
-  
+
   const statusConfig = {
     applied: { color: 'emerald', icon: <CheckCircleIcon />, label: 'Applied' },
     reverted: { color: 'amber', icon: <RevertIcon />, label: 'Reverted' },
     failed: { color: 'red', icon: <XCircleIcon />, label: 'Failed' }
   };
-  
+
   const status = statusConfig[entry.status];
-  
+
   return (
     <Card className={`${expanded ? 'ring-1 ring-slate-600/50' : ''}`}>
       <button
@@ -115,11 +115,11 @@ function HistoryItem({ entry, onRevert, isReverting }: HistoryItemProps) {
                 </Badge>
               )}
             </div>
-            
+
             <h4 className="text-sm font-medium text-slate-200 mb-1 truncate">
               {entry.suggestion?.title || 'Manual modification'}
             </h4>
-            
+
             <div className="flex items-center gap-3 text-xs text-slate-500">
               <span className="flex items-center gap-1">
                 <FileIcon />
@@ -133,13 +133,13 @@ function HistoryItem({ entry, onRevert, isReverting }: HistoryItemProps) {
               )}
             </div>
           </div>
-          
+
           <span className="text-xs text-slate-500 flex-shrink-0">
             {formatTime(entry.timestamp)}
           </span>
         </div>
       </button>
-      
+
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-slate-700/50 pt-3">
           {entry.suggestion && (
@@ -147,7 +147,7 @@ function HistoryItem({ entry, onRevert, isReverting }: HistoryItemProps) {
               <p className="text-sm text-slate-400">
                 {entry.suggestion.description}
               </p>
-              
+
               <div className="text-xs text-slate-500">
                 <p>Confidence: {Math.round((entry.suggestion.confidence || 0) * 100)}%</p>
                 {entry.suggestion.lineRange && (
@@ -156,7 +156,7 @@ function HistoryItem({ entry, onRevert, isReverting }: HistoryItemProps) {
               </div>
             </>
           )}
-          
+
           {entry.status === 'applied' && entry.backupId && (
             <Button
               variant="secondary"
@@ -183,7 +183,7 @@ export function HistoryPanel() {
   const { modificationHistory } = useStore();
   const { revert } = useModifications();
   const { getHistory } = useGitOperations();
-  
+
   const [gitHistory, setGitHistory] = useState<Array<{
     hash: string;
     date: string;
@@ -193,7 +193,7 @@ export function HistoryPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [revertingId, setRevertingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'modifications' | 'commits'>('modifications');
-  
+
   // Fetch Git history
   useEffect(() => {
     if (projectPath && activeTab === 'commits') {
@@ -203,7 +203,7 @@ export function HistoryPanel() {
         .finally(() => setIsLoading(false));
     }
   }, [projectPath, activeTab, getHistory]);
-  
+
   const handleRevert = async (entry: ModificationEntry) => {
     setRevertingId(entry.id);
     try {
@@ -212,7 +212,7 @@ export function HistoryPanel() {
       setRevertingId(null);
     }
   };
-  
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -226,7 +226,7 @@ export function HistoryPanel() {
             {modificationHistory.length} changes
           </Badge>
         </div>
-        
+
         {/* Tabs */}
         <div className="flex gap-1 p-1 bg-slate-800/50 rounded-lg">
           <button
@@ -255,7 +255,7 @@ export function HistoryPanel() {
           </button>
         </div>
       </div>
-      
+
       {/* Content */}
       <div className="flex-1 overflow-auto p-4">
         {activeTab === 'modifications' ? (

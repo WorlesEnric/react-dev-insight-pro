@@ -10,7 +10,7 @@ import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import { createApp } from './app';
 import { loadConfig } from './config';
-import { WebSocketMessage, APIResponse } from './types';
+import { WebSocketMessage } from './types';
 
 // WebSocket client tracking
 interface WSClient {
@@ -27,7 +27,7 @@ const clients = new Map<string, WSClient>();
  */
 function broadcast(message: WebSocketMessage, filterFn?: (client: WSClient) => boolean): void {
   const messageStr = JSON.stringify(message);
-  
+
   clients.forEach(client => {
     if (client.ws.readyState === WebSocket.OPEN) {
       if (!filterFn || filterFn(client)) {
@@ -55,8 +55,8 @@ function handleMessage(client: WSClient, data: string): void {
     switch (message.type) {
       case 'subscribe':
         // Subscribe to project updates
-        if (message.data?.projectPath) {
-          client.projectPath = message.data.projectPath;
+        if (message.data && 'projectPath' in message.data) {
+          client.projectPath = (message.data as { projectPath: string }).projectPath;
           client.ws.send(JSON.stringify({
             type: 'subscribed',
             data: { projectPath: client.projectPath }
@@ -66,7 +66,8 @@ function handleMessage(client: WSClient, data: string): void {
 
       case 'unsubscribe':
         // Unsubscribe from project updates
-        client.projectPath = undefined;
+        // Unsubscribe from project updates
+        delete client.projectPath;
         client.ws.send(JSON.stringify({
           type: 'unsubscribed',
           data: {}
@@ -97,14 +98,14 @@ function handleMessage(client: WSClient, data: string): void {
  * Setup WebSocket server
  */
 function setupWebSocket(server: http.Server): WebSocketServer {
-  const wss = new WebSocketServer({ 
+  const wss = new WebSocketServer({
     server,
     path: '/ws'
   });
 
-  wss.on('connection', (ws: WebSocket, req) => {
+  wss.on('connection', (ws: WebSocket, _req) => {
     const clientId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const client: WSClient = {
       id: clientId,
       ws,
@@ -117,7 +118,7 @@ function setupWebSocket(server: http.Server): WebSocketServer {
     // Send welcome message
     ws.send(JSON.stringify({
       type: 'connected',
-      data: { 
+      data: {
         clientId,
         timestamp: Date.now()
       }
@@ -145,7 +146,7 @@ function setupWebSocket(server: http.Server): WebSocketServer {
 
     clients.forEach((client, id) => {
       const inactive = now.getTime() - client.lastActivity.getTime() > timeout;
-      
+
       if (inactive || client.ws.readyState !== WebSocket.OPEN) {
         client.ws.terminate();
         clients.delete(id);
@@ -164,7 +165,7 @@ async function startServer(): Promise<void> {
   try {
     const config = await loadConfig();
     const app = await createApp();
-    
+
     const server = http.createServer(app);
     const wss = setupWebSocket(server);
 
@@ -179,7 +180,7 @@ async function startServer(): Promise<void> {
       console.log(`API Docs:  http://${host}:${port}/api`);
       console.log(`Health:    http://${host}:${port}/api/health`);
       console.log('================================');
-      
+
       const apiKey = process.env.LLM_API_KEY || process.env.OPENAI_API_KEY;
       if (!apiKey) {
         console.log('\n⚠️  LLM_API_KEY or OPENAI_API_KEY not set');
