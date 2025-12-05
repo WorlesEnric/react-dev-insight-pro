@@ -1,0 +1,42 @@
+{
+  "git": {
+    "autoCommit": true,
+    "branchPrefix": "ai-optimization/",
+    "requireCleanWorkingDir": true,
+    "commitMessagePrefix": "[React Dev Insight]"
+  },
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-20250514",
+    "temperature": 0.2,
+    "maxTokens": 4096,
+    "maxChangesPerRequest": 5
+  },
+  "optimization": {
+    "allowedCategories": [
+      "performance",
+      "accessibility",
+      "maintainability",
+      "bundle-size",
+      "ux",
+      "code-quality"
+    ],
+    "requireReview": true,
+    "autoRunTests": false,
+    "autoFormat": true
+  },
+  "server": {
+    "port": 3847,
+    "host": "localhost"
+  },
+  "backup": {
+    "enabled": true,
+    "maxBackups": 50,
+    "backupDir": ".react-dev-insight-backups"
+  },
+  "ui": {
+    "theme": "dark",
+    "showLineNumbers": true,
+    "diffStyle": "split"
+  }
+}

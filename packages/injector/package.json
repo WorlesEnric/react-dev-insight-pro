@@ -1,0 +1,16 @@
+{
+  "name": "@react-dev-insight/injector",
+  "version": "1.0.0",
+  "description": "Runtime injection script for React component inspection",
+  "type": "module",
+  "main": "dist/injector.js",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --minify --outfile=dist/injector.js --format=iife --global-name=ReactDevInsight",
+    "build:dev": "esbuild src/index.ts --bundle --outfile=dist/injector.js --format=iife --global-name=ReactDevInsight --sourcemap",
+    "watch": "esbuild src/index.ts --bundle --outfile=dist/injector.js --format=iife --global-name=ReactDevInsight --sourcemap --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  }
+}
