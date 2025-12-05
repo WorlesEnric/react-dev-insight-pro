@@ -117,6 +117,8 @@ export function useCodeAnalysis() {
     addNotification
   } = useStore();
 
+  const setSelectedElement = useStore(state => state.setSelectedElement);
+
   const analyzeSelected = useCallback(async (
     goal?: OptimizationCategory | string
   ) => {
@@ -145,6 +147,15 @@ export function useCodeAnalysis() {
       });
 
       setAnalysisResult(result);
+
+      // Update selectedElement with resolved filePath if it was missing or Unknown
+      if (selectedElement && (!selectedElement.filePath || selectedElement.filePath === 'Unknown') && result.filePath) {
+        setSelectedElement({
+          ...selectedElement,
+          filePath: result.filePath
+        });
+      }
+
       addNotification('success', `Found ${result.suggestions.length} suggestions`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Analysis failed';
@@ -158,6 +169,7 @@ export function useCodeAnalysis() {
     setAnalyzing,
     setAnalysisError,
     setAnalysisResult,
+    setSelectedElement,
     addNotification
   ]);
 

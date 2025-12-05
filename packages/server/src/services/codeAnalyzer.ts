@@ -30,9 +30,30 @@ export class CodeAnalyzerService {
     const llm = getLLMService();
 
     // Find the source file
-    const filePath = request.componentInfo.filePath;
-    if (!filePath) {
-      throw new Error('Component file path not provided');
+    let filePath = request.componentInfo.filePath;
+
+    // Try to resolve file path if unknown or missing
+    if (!filePath || filePath === 'Unknown') {
+      const componentName =
+        request.componentInfo.name ||
+        request.componentInfo.displayName;
+
+      if (componentName) {
+        console.log(`[CodeAnalyzer] Attempting to resolve file for component: ${componentName}`);
+        const resolvedPath = await this.findComponentFile(componentName);
+        if (resolvedPath) {
+          console.log(`[CodeAnalyzer] Resolved path: ${resolvedPath}`);
+          filePath = resolvedPath;
+        } else {
+          console.warn(`[CodeAnalyzer] Failed to resolve file for component: ${componentName}`);
+        }
+      }
+    }
+
+    if (!filePath || filePath === 'Unknown') {
+      const name = request.componentInfo.name || request.componentInfo.displayName || 'Unknown';
+      console.error(`[CodeAnalyzer] File path missing for component: ${name}. path='${filePath}'`);
+      throw new Error(`Component file path not provided for component: ${name}`);
     }
 
     // Read the source file
